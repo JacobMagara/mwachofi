@@ -121,16 +121,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Contact form submission
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Thank you for your message! Lily will get back to you soon.');
-            this.reset();
-        });
-    }
+    // Form submission with FormSubmit
+const contactForm = document.getElementById('contactForm');
 
+if (contactForm) {
+    // Create status message element
+    const formStatus = document.createElement('div');
+    formStatus.id = 'formStatus';
+    contactForm.appendChild(formStatus);
+    
+    contactForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitButton = contactForm.querySelector('button[type="submit"]');
+        const formData = new FormData(contactForm);
+        
+        // Change button state
+        submitButton.disabled = true;
+        submitButton.textContent = 'Sending...';
+        formStatus.textContent = '';
+        formStatus.className = '';
+        
+        try {
+            // Using FormSubmit service
+            const response = await fetch('https://formsubmit.co/ajax/lilymwachofi@gmail.com', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success === "true") {
+                // Success message
+                formStatus.textContent = 'Message sent successfully! I will get back to you soon.';
+                formStatus.className = 'success';
+                contactForm.reset();
+            } else {
+                throw new Error(result.message || 'Failed to send message');
+            }
+        } catch (error) {
+            // Error message
+            formStatus.textContent = 'Error: ' + error.message;
+            formStatus.className = 'error';
+            console.error('Form submission error:', error);
+        } finally {
+            // Reset button state
+            submitButton.disabled = false;
+            submitButton.textContent = 'Send Message';
+        }
+    });
+}
     // Add animation to cards when they come into view
     const observerOptions = {
         threshold: 0.1
